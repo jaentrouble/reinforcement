@@ -40,7 +40,7 @@ class Main() :
         mainloop = True
         self.screen.blit(self.background, (0,0))
         self.b_update()
-        time.sleep(3)
+        # time.sleep(3)
         while mainloop :
             result = None
             reward = 0
