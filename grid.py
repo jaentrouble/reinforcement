@@ -3,7 +3,7 @@ from constants import *
 import tool
 
 class Grid() :
-    def __init__ (self, width, height, snakelength : int) :
+    def __init__ (self, width, height, snakelength : int, rand = True) :
         """
         Grid
         snakelength : initial snake length
@@ -11,20 +11,31 @@ class Grid() :
         self.grid = []
         self.width = width
         self.height = height
-        for i in range (width) :
+        self.rand = rand
+        self.snakelength = snakelength
+        for i in range (self.width) :
             self.grid.append([])
-            for _ in range(height) :
+            for _ in range(self.height) :
                 self.grid[i].append(None)
-        self.snake = Snake(tool.randposlist(snakelength, self.width, self.height))
+        if self.rand :   
+            self.snake = Snake(tool.randposlist(self.snakelength, self.width, self.height))
+        else :
+            self.s_init = tool.randposlist(self.snakelength, self.width, self.height)
+            self.snake = Snake(self.s_init)
         for pos in self.snake.get_list() :
             self.grid[pos[0]][pos[1]] = self.snake
         self.apples = []
         self.create_apple()
 
-    def create_apple(self) :
-        tmpos = tool.randpos(0, self.width-1, 0, self.height-1)
-        while self.grid[tmpos[0]][tmpos[1]] != None :
+    def create_apple(self, pos = None) :
+        if pos == None :
             tmpos = tool.randpos(0, self.width-1, 0, self.height-1)
+            while self.grid[tmpos[0]][tmpos[1]] != None :
+                tmpos = tool.randpos(0, self.width-1, 0, self.height-1)
+            if not self.rand :
+                self.a_init = tmpos
+        else :
+            tmpos = pos
         self.apples.append(Apple(tmpos))
         self.grid[tmpos[0]][tmpos[1]] = self.apples[-1]
 
@@ -78,6 +89,22 @@ class Grid() :
             self.create_apple()
             return GROW
 
+    def reset(self) :
+        for i in range (self.width) :
+            for j in range(self.height) :
+                self.grid[i][j] = None
+        if self.rand :   
+            self.snake = Snake(tool.randposlist(self.snakelength, self.width, self.height))
+        else :
+            self.snake = Snake(self.s_init)
+        for pos in self.snake.get_list() :
+            self.grid[pos[0]][pos[1]] = self.snake
+        self.apples = []
+        if not self.rand:
+            self.create_apple(self.a_init)
+        else :
+            self.create_apple()
+
 class Snake() :
     def __init__(self, bodypos : list) :
         """
@@ -101,7 +128,7 @@ class Snake() :
         elif direction == DOWN :
             trgt[1] += 1
         self.body.insert(0,trgt)
-        self.health -= 1
+        self.health -= Consume_health
 
         if not apple :
             self.body.pop()
@@ -124,6 +151,13 @@ class Snake() :
         self.health += Apple_health
 
 class Apple() :
+    def __init__(self, pos : list) :
+        self.pos = pos
+
+    def get_pos(self) :
+        return self.pos.copy()
+
+class Trap() :
     def __init__(self, pos : list) :
         self.pos = pos
 

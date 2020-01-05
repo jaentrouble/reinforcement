@@ -17,14 +17,14 @@ class Main() :
         self.allgroup = pygame.sprite.LayeredDirty()
         self.g_x = self.width // B_size
         self.g_y = self.height // B_size
-        self.grid = grid.Grid(self.g_x, self.g_y, 3)
+        self.grid = grid.Grid(self.g_x, self.g_y, 3, False)
         self.groupsetter()
         self.boxes = {grid.Snake : [],
                       grid.Apple : []}
         self.point = 0
 
     def reset(self) :
-        self.grid = grid.Grid(self.g_x, self.g_y, 3)
+        self.grid.reset()
         self.b_update()
         self.point = 0
 

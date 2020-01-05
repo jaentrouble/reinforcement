@@ -10,3 +10,4 @@ GROW = 2
 B_size = 10
 Init_health = 100
 Apple_health = 100
+Consume_health = 0

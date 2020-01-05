@@ -5,11 +5,12 @@ from constants import *
 class Box (pygame.sprite.DirtySprite) :
     base_box = pygame.Surface((B_size, B_size))
     color_dic = {grid.Snake : (255,255,255),
-                 grid.Apple : (255,0,0),}
-    img = {grid.Snake : base_box.copy(),
-           grid.Apple : base_box.copy(),}
-    img[grid.Snake].fill(color_dic[grid.Snake])
-    img[grid.Apple].fill(color_dic[grid.Apple])
+                 grid.Apple : (255,0,0),
+                 grid.Trap : (0,255,0)}
+    img = {}
+    for obj in color_dic :
+        img[obj] = base_box.copy()
+        img[obj].fill(color_dic[obj])
 
     def __init__(self, obj) :
         """
