@@ -20,7 +20,7 @@ class Main() :
         self.allgroup = pygame.sprite.LayeredDirty()
         self.g_x = self.width // B_size
         self.g_y = self.height // B_size
-        self.grid = grid.Grid(self.g_x, self.g_y, 1, False, trap)
+        self.grid = grid.Grid(self.g_x, self.g_y, 3, False, trap)
         self.groupsetter()
         self.boxes = {grid.Snake : [],
                       grid.Apple : [],
@@ -35,6 +35,7 @@ class Main() :
 
     def groupsetter(self) :
         boxes.Box.groups = self.allgroup
+        
 
     def run(self) :
         mainloop = True
@@ -85,13 +86,14 @@ class Main() :
             if result == GROW :
                 reward = 10
                 rst = True
+            if result == DEAD :
+                reward = -0.1
+                rst = True
             cap = '[FPS] : {0:.1f}, Moved : {1}, Health : {2}, Loop : {3}'.format(\
                 self.clock.get_fps(), self.point, self.grid.snake_health(), self.qtable.get_loop())
             pygame.display.set_caption(cap)
             pygame.display.flip()
-            if result == DEAD :
-                reward = -0.1
-                rst = True
+            
             self.qtable.update(head, direction, reward)
             if rst :
                 self.qtable.looped()
@@ -111,4 +113,4 @@ class Main() :
                 self.boxes[obj][n].update(dic[obj][n])
 
 if __name__ == '__main__' :
-    Main(width = 800, height = 800, fps=60, trap = 100).run()
+    Main(width = 400, height = 400, fps=60, trap = 40).run()

@@ -13,3 +13,4 @@ Apple_health = 100
 Consume_health = 0
 Q_e = 0.3
 Q_gamma = 0.7
+Q_alpha = 0.1

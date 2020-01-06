@@ -40,21 +40,21 @@ class Qtable() :
         vector = self.table[pos[0]][pos[1]]
         if direction == RIGHT :
             if pos[0] +1 == self.width :
-                vector[direction] = reward
+                vector[direction] = (1-Q_alpha)*vector[direction] + Q_alpha*(reward)
             else :
-                vector[direction] = reward + Q_gamma *self.qmax([pos[0]+1,pos[1]])
+                vector[direction] = (1-Q_alpha)*vector[direction] + Q_alpha*(reward + Q_gamma *self.qmax([pos[0]+1,pos[1]]))
         elif direction == LEFT :
             if pos[0] == 0 :
-                vector[direction] = reward
+                vector[direction] = (1-Q_alpha)*vector[direction] + Q_alpha*(reward)
             else :
-                vector[direction] = reward + Q_gamma *self.qmax([pos[0]-1,pos[1]])
+                vector[direction] = (1-Q_alpha)*vector[direction] + Q_alpha*(reward + Q_gamma *self.qmax([pos[0]-1,pos[1]]))
         elif direction == UP :
             if pos[1] == 0 :
-                vector[direction] = reward
+                vector[direction] = (1-Q_alpha)*vector[direction] + Q_alpha*(reward)
             else :
-                vector[direction] = reward + Q_gamma *self.qmax([pos[0],pos[1]-1])
+                vector[direction] = (1-Q_alpha)*vector[direction] + Q_alpha*(reward + Q_gamma *self.qmax([pos[0],pos[1]-1]))
         elif direction == DOWN :
             if pos[1] +1 == self.height :
-                vector[direction] = reward
+                vector[direction] = (1-Q_alpha)*vector[direction] + Q_alpha*(reward)
             else :
-                vector[direction] = reward + Q_gamma *self.qmax([pos[0],pos[1]+1])
+                vector[direction] = (1-Q_alpha)*vector[direction] + Q_alpha*(reward + Q_gamma *self.qmax([pos[0],pos[1]+1]))
