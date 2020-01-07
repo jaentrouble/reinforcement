@@ -1,6 +1,6 @@
-import pygame
 from constants import *
 import tool
+import math
 
 class Grid() :
     def __init__ (self, width, height, snakelength : int, rand = True, trap = 0) :
@@ -34,6 +34,14 @@ class Grid() :
         self.create_apple(self.a_init)
         for _ in range(self.trap_num) :
             self.create_trap()
+        self.control_choice = 4 
+        self.info = len(self.get_state())
+
+    def action_size(self) :
+        return self.control_choice
+
+    def state_size(self) :
+        return self.info
 
     def create_trap(self, pos = None) :
         if pos == None :
@@ -88,41 +96,97 @@ class Grid() :
         """
         return self.apples[0].get_pos()
         
-    def update(self, direction) :
-        trgt = self.snake.get_head()
+    def reward(self, direction) :
+        """
+        gets action (direction to move)
+        returns reward, done
+        done : bool
+        """
+        trgt = self.snake_head()
+        bef = trgt.copy()
+        app = self.apple()
+        state = None
+
         if direction == RIGHT :
             trgt[0] += 1
             if trgt[0] > self.width-1 :
-                return DEAD
+                state =  DEAD
         elif direction == UP :
             trgt[1] -= 1
             if trgt[1] < 0 :
-                return DEAD
+                state = DEAD
         elif direction == LEFT :
             trgt[0] -= 1
             if trgt[0] < 0 :
-                return DEAD
+                state = DEAD
         elif direction == DOWN :
             trgt[1] += 1
             if trgt[1] > self.height-1 :
-                return DEAD
+                state = DEAD
+        if state == DEAD :
+            return Reward_dead, True
+        else :
+            aft = trgt.copy()
 
         if self.grid[trgt[0]][trgt[1]] == None :
             tail = self.snake.get_tail()
             self.grid[tail[0]][tail[1]] = None
             self.grid[trgt[0]][trgt[1]] = self.snake
             self.snake.move(direction)
-            return MOVED
+            if self.snake_health() < 0 :
+                state = DEAD
+            else :
+                state =  MOVED
         elif isinstance(self.grid[trgt[0]][trgt[1]], (Snake, Trap)) :
-            return DEAD
+            state = DEAD
         elif isinstance(self.grid[trgt[0]][trgt[1]], Apple) :
             if self.rand :
                 self.apples.remove(self.grid[trgt[0]][trgt[1]])
                 self.grid[trgt[0]][trgt[1]] = self.snake
                 self.snake.move(direction, True)
                 self.create_apple()
-            return GROW
+            state = GROW
+        
+        if state == DEAD :
+            return Reward_dead, True
+        elif state == MOVED :
+            befdist = math.sqrt(abs(bef[0]-app[0])**2 + abs(bef[1]-app[1])**2)
+            aftdist = math.sqrt(abs(aft[0]-app[0])**2 + abs(aft[1]-app[1])**2)
+            return (befdist - aftdist)*Reward_movement, False
+        elif state == GROW :
+            return Reward_grow, False
 
+    def get_state(self) :
+        """
+        returns [xp, xn, yp, yn, apple_x, apple_y]
+        """
+        xp, xn, yp, yn = 1, 1, 1, 1
+        head = self.snake_head()
+        x = head[0]
+        y = head[1]
+        for column in self.grid[x+1: ] :
+            if isinstance(column[y], (Snake, Trap)):
+                break
+            else :
+                xp += 1
+        for column in reversed(self.grid[:x]) :
+            if isinstance(column[y], (Snake, Trap)) :
+                break
+            else :
+                xn += 1
+        for row in self.grid[x][y+1:] :
+            if isinstance(row, (Snake, Trap)) :
+                break
+            else :
+                yp += 1
+        for row in reversed(self.grid[x][:y]) :
+            if isinstance(row, (Snake, Trap)) :
+                break
+            else :
+                yn += 1
+        ap = self.apple()
+        return [xp, xn, yp, yn, ap[0]-x, ap[1]-y, self.snake_health()]
+                
     def reset(self) :
         for i in range (self.width) :
             for j in range(self.height) :

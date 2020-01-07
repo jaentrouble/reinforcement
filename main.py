@@ -5,6 +5,7 @@ import boxes
 import Qlearn as ql
 import math
 import time
+import DQ as dq
 
 class Main() :
     def __init__ (self, width = 720, height = 720, fps = 60, trap = 15) :
@@ -20,18 +21,21 @@ class Main() :
         self.allgroup = pygame.sprite.LayeredDirty()
         self.g_x = self.width // B_size
         self.g_y = self.height // B_size
-        self.grid = grid.Grid(self.g_x, self.g_y, 3, False, trap)
+        self.grid = grid.Grid(self.g_x, self.g_y, 3, True, trap)
         self.groupsetter()
         self.boxes = {grid.Snake : [],
                       grid.Apple : [],
                       grid.Trap : []}
         self.point = 1
-        self.qtable = ql.Qtable(self.g_x, self.g_y)
+        self.player = dq.Player(self.grid)
+        self.loop = 0
+        # self.qtable = ql.Qtable(self.g_x, self.g_y)
 
     def reset(self) :
         self.grid.reset()
         self.b_update()
         self.point = 1
+        self.loop += 1
 
     def groupsetter(self) :
         boxes.Box.groups = self.allgroup
@@ -43,18 +47,16 @@ class Main() :
         self.b_update()
         # time.sleep(3)
         while mainloop :
-            result = None
-            reward = 0
-            rst = False
-            milliseconds = self.clock.tick(self.fps)
-            head = self.grid.snake_head()
-            apple = self.grid.apple()
-            befdist = math.sqrt(abs(head[0]-apple[0])**2 + abs(head[1]-apple[1])**2)
-            direction = self.qtable.action(head, befdist, self.point)
-            result = self.grid.update(direction)
-            new_head = self.grid.snake_head()
-            aftdist = math.sqrt(abs(new_head[0]-apple[0])**2 + abs(new_head[1]-apple[1])**2)
-            self.b_update()
+            self.clock.tick(self.fps)
+            # result = None
+            # reward = 0
+            # head = self.grid.snake_head()
+            # apple = self.grid.apple()
+            # befdist = math.sqrt(abs(head[0]-apple[0])**2 + abs(head[1]-apple[1])**2)
+            # direction = self.qtable.action(head, befdist, self.point)
+            # result = self.grid.update(direction)
+            # new_head = self.grid.snake_head()
+            # aftdist = math.sqrt(abs(new_head[0]-apple[0])**2 + abs(new_head[1]-apple[1])**2)
             ###escape
             for event in pygame.event.get() :
                 if event.type == pygame.QUIT :
@@ -64,39 +66,40 @@ class Main() :
                             mainloop = False 
                             return
             ######################################
-                    if event.key == pygame.K_LEFT :
-                        result = self.grid.update(LEFT)
-                        self.b_update()
-                    elif event.key == pygame.K_RIGHT :
-                        result = self.grid.update(RIGHT)
-                        self.b_update()
-                    elif event.key == pygame.K_UP :
-                        result = self.grid.update(UP)
-                        self.b_update()
-                    elif event.key == pygame.K_DOWN :
-                        result = self.grid.update(DOWN)
-                        self.b_update()
-
+                    # if event.key == pygame.K_LEFT :
+                    #     result = self.grid.update(LEFT)
+                    #     self.b_update()
+                    # elif event.key == pygame.K_RIGHT :
+                    #     result = self.grid.update(RIGHT)
+                    #     self.b_update()
+                    # elif event.key == pygame.K_UP :
+                    #     result = self.grid.update(UP)
+                    #     self.b_update()
+                    # elif event.key == pygame.K_DOWN :
+                    #     result = self.grid.update(DOWN)
+                    #     self.b_update()
+            # if result == MOVED or result == GROW :
+            #     self.point += 1
+            # if Reward_apple_distance:
+            #     reward = befdist - aftdist
+            # if result == GROW :
+            #     reward = Reward_grow
+            #     rst = True
+            # if result == DEAD :
+            #     reward = Reward_dead
+            #     rst = True
+            done = self.player.update()
+            self.b_update()
             self.allgroup.clear(self.screen, self.background)
             self.allgroup.draw(self.screen)
-            if result == MOVED or result == GROW :
-                self.point += 1
-            if befdist * aftdist != 0 :
-                reward = befdist - aftdist
-            if result == GROW :
-                reward = 10
-                rst = True
-            if result == DEAD :
-                reward = -0.1
-                rst = True
             cap = '[FPS] : {0:.1f}, Moved : {1}, Health : {2}, Loop : {3}'.format(\
-                self.clock.get_fps(), self.point, self.grid.snake_health(), self.qtable.get_loop())
+                self.clock.get_fps(), self.point, self.grid.snake_health(), self.loop)
             pygame.display.set_caption(cap)
             pygame.display.flip()
             
-            self.qtable.update(head, direction, reward)
-            if rst :
-                self.qtable.looped()
+            # self.qtable.update(head, direction, reward)
+            if done :
+                # self.qtable.looped()
                 self.reset()
 
     def b_update (self) :
@@ -113,4 +116,4 @@ class Main() :
                 self.boxes[obj][n].update(dic[obj][n])
 
 if __name__ == '__main__' :
-    Main(width = 400, height = 400, fps=60, trap = 40).run()
+    Main(width = 400, height = 400, fps=60, trap = 0).run()
