@@ -6,6 +6,7 @@ import Qlearn as ql
 import math
 import time
 import DQ as dq
+import tracemalloc
 
 class Main() :
     def __init__ (self, width = 720, height = 720, fps = 60, trap = 15) :
@@ -42,6 +43,7 @@ class Main() :
         
 
     def run(self) :
+        tracemalloc.start(25)
         mainloop = True
         self.screen.blit(self.background, (0,0))
         self.b_update()
@@ -63,9 +65,16 @@ class Main() :
                     mainloop = False
                 elif event.type == pygame.KEYDOWN :
                     if event.key == pygame.K_ESCAPE :
-                            mainloop = False 
-                            return
+                        mainloop = False 
+                        return
             ######################################
+                    if event.key == pygame.K_t :
+                        snapshot = tracemalloc.take_snapshot()
+                        top_stats = snapshot.statistics('traceback')
+                        stat = top_stats[0]
+                        print("%s memory blocks: %.1f KiB" % (stat.count, stat.size / 1024))
+                        for line in stat.traceback.format() :
+                            print(line)
                     # if event.key == pygame.K_LEFT :
                     #     result = self.grid.update(LEFT)
                     #     self.b_update()
@@ -92,7 +101,7 @@ class Main() :
             self.b_update()
             self.allgroup.clear(self.screen, self.background)
             self.allgroup.draw(self.screen)
-            cap = '[FPS] : {0:.1f}, Moved : {1}, Health : {2}, Loop : {3}'.format(\
+            cap = '[FPS] : {0:.1f}, Mvd : {1}, Hp : {2}, Lp : {3}'.format(\
                 self.clock.get_fps(), self.point, self.grid.snake_health(), self.loop)
             pygame.display.set_caption(cap)
             pygame.display.flip()

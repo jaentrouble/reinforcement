@@ -17,7 +17,8 @@ Q_alpha = 0.1
 
 DQ_discount = 0.9
 DQ_e = 0.1
-DQ_buffer_size = 15
+DQ_buffer_size = 100
+DQ_mini_buffer = 20
 
 Reward_grow = 10
 Reward_dead = -10

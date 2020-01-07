@@ -20,6 +20,7 @@ class Player () :
 
         self.input_buffer = np.empty((0,self.input_size))
         self.target_buffer = np.empty((0,self.output_size))
+        self.count = 0
 
     def choose_action (self, q : np.array) :
         """
@@ -44,10 +45,16 @@ class Player () :
         self.input_buffer = np.vstack((self.input_buffer, bef_state))
         self.target_buffer = np.vstack((self.target_buffer, q))
 
-        if len(self.input_buffer) >= DQ_buffer_size :
-            self.model.fit(x = self.input_buffer, y = self.target_buffer)
-            self.input_buffer = np.empty((0,self.input_size))
-            self.target_buffer = np.empty((0,self.output_size))
+        if len(self.input_buffer) > DQ_buffer_size :
+            self.input_buffer = np.delete(self.input_buffer,0,0)
+        if done :
+            mini_idx = random.sample(range(len(self.input_buffer)),min(DQ_mini_buffer,len(self.input_buffer)))
+            mini_input = np.empty((0,self.input_size))
+            mini_target = np.empty((0,self.output_size))
+            for idx in mini_idx :
+                mini_input = np.vstack((mini_input,self.input_buffer[idx]))
+                mini_target = np.vstack((mini_target,self.target_buffer[idx]))
+            self.model.fit(x = mini_input, y = mini_target)
         return done
 
 
