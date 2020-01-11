@@ -1,4 +1,5 @@
 from constants import *
+import numpy as np
 import tool
 import math
 
@@ -152,7 +153,11 @@ class Grid() :
         elif state == MOVED :
             befdist = math.sqrt(abs(bef[0]-app[0])**2 + abs(bef[1]-app[1])**2)
             aftdist = math.sqrt(abs(aft[0]-app[0])**2 + abs(aft[1]-app[1])**2)
-            return (befdist - aftdist)*Reward_movement, False
+            tmp = befdist - aftdist
+            if tmp < 0 :
+                return -1 * Reward_movement, False
+            else :
+                return 0, False
         elif state == GROW :
             return Reward_grow, False
 
@@ -184,8 +189,9 @@ class Grid() :
                 break
             else :
                 yn += 1
-        ap = self.apple()
-        return [xp, xn, yp, yn, ap[0]-x, ap[1]-y, self.snake_health()]
+        ap = np.array(self.apple())
+        ap = np.tanh(ap)
+        return [1/xp, 1/xn, 1/yp, 1/yn, ap[0], ap[1],]
                 
     def reset(self) :
         for i in range (self.width) :
