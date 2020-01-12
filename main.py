@@ -22,7 +22,7 @@ class Main() :
         self.allgroup = pygame.sprite.LayeredDirty()
         self.g_x = self.width // B_size
         self.g_y = self.height // B_size
-        self.grid = grid.Grid(self.g_x, self.g_y, 3, True, trap)
+        self.grid = grid.Grid(self.g_x, self.g_y, 1, True, trap)
         self.groupsetter()
         self.boxes = {grid.Snake : [],
                       grid.Apple : [],
@@ -125,4 +125,4 @@ class Main() :
                 self.boxes[obj][n].update(dic[obj][n])
 
 if __name__ == '__main__' :
-    Main(width = 400, height = 400, fps=60, trap = 0).run()
+    Main(width = 400, height = 400, fps=60, trap = 40).run()

@@ -11,8 +11,8 @@ class Player () :
         self.output_size = game.action_size()
         self.inputs = tf.keras.Input(shape = (self.input_size,))
         self.x = tf.keras.layers.Dense(10, activation = 'linear')(self.inputs)
-        self.x = tf.keras.layers.Dense(10, activation = 'sigmoid')(self.x)
-        self.outputs = tf.keras.layers.Dense(self.output_size, activation = 'tanh', kernel_initializer = 'zeros')(self.x)
+        self.x = tf.keras.layers.Dense(8, activation = 'tanh')(self.inputs)
+        self.outputs = tf.keras.layers.Dense(self.output_size, activation = 'linear', kernel_initializer = 'zeros')(self.x)
         self.model = tf.keras.Model(inputs = self.inputs, outputs = self.outputs)
         self.model.compile(optimizer = tf.keras.optimizers.Adam(),
                            loss = tf.keras.losses.MeanSquaredError(),
@@ -32,14 +32,16 @@ class Player () :
         """
         q: shape (1,1); [[*args]]
         """
-        if random.random() < DQ_e/self.count :
+        if random.random() < min(DQ_e, DQ_e/(0.1*self.count)) :
             print('random')
             return random.randrange(0,len(q[0]))
         else :
-            return np.argmax(q[0])
+            m = max(q[0])
+            indices = [i for i, x in enumerate(q[0]) if x == m]
+            return random.choice(indices)
 
     def normalize (self, n : np.array) :
-        return tf.keras.utils.normalize(n.astype('float64'))
+        return n.astype('float64')
 
     def update (self) :
         self.acted += 1
@@ -48,14 +50,14 @@ class Player () :
         print(q)
         action = self.choose_action(q)
         reward, done = self.game.reward(action)
-        reward = float(reward)
+        reward = DQ_reward_mul*float(reward)
         aft_state = self.normalize(np.array([self.game.get_state()]))
         print(float(reward))
         if done :
             q[0, action] = reward
         else:
             q[0, action] = reward + DQ_discount * np.max(self.t_model.predict(aft_state))
-            a = q[0, action]
+            # a = q[0, action]
         self.input_buffer = np.vstack((self.input_buffer, bef_state))
         self.target_buffer = np.vstack((self.target_buffer, q))
         if len(self.input_buffer) > DQ_buffer_size :

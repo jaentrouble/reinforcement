@@ -157,7 +157,7 @@ class Grid() :
             if tmp < 0 :
                 return -1 * Reward_movement, False
             else :
-                return 0, False
+                return Reward_movement, False
         elif state == GROW :
             return Reward_grow, False
 
@@ -189,9 +189,14 @@ class Grid() :
                 break
             else :
                 yn += 1
-        ap = np.array(self.apple())
+        ap = np.array((self.apple()[0]-x, self.apple()[1]-y))
+        x_len = len(self.grid)
+        y_len = len(self.grid[0])
         ap = np.tanh(ap)
-        return [1/xp, 1/xn, 1/yp, 1/yn, ap[0], ap[1],]
+        xy = np.array([xp/x_len, xn/x_len, yp/y_len, yn/y_len])
+        dotted = np.dot(ap.reshape(-1,1),xy.reshape(1,-1))
+        dotted = dotted.flatten()
+        return dotted
                 
     def reset(self) :
         for i in range (self.width) :
