@@ -37,7 +37,7 @@ def randposlist(n : int, width : int, height : int):
             new[0] -= i+1
             body.append(new)
 
-    return body
+    return body, direction
 
 def randpos (xmin : int, xmax : int, ymin : int, ymax : int ) :
     """

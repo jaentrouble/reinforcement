@@ -10,8 +10,8 @@ class Player () :
         self.input_size = game.state_size()
         self.output_size = game.action_size()
         self.inputs = tf.keras.Input(shape = (self.input_size,))
-        self.x = tf.keras.layers.Dense(10, activation = 'linear')(self.inputs)
-        self.x = tf.keras.layers.Dense(8, activation = 'tanh')(self.inputs)
+        self.x = tf.keras.layers.Dense(6, activation = 'linear')(self.inputs)
+        self.x = tf.keras.layers.Dense(4, activation = 'tanh')(self.inputs)
         self.outputs = tf.keras.layers.Dense(self.output_size, activation = 'linear', kernel_initializer = 'zeros')(self.x)
         self.model = tf.keras.Model(inputs = self.inputs, outputs = self.outputs)
         self.model.compile(optimizer = tf.keras.optimizers.Adam(),
@@ -41,6 +41,7 @@ class Player () :
             return random.choice(indices)
 
     def normalize (self, n : np.array) :
+        n = tf.keras.utils.normalize(n)
         return n.astype('float64')
 
     def update (self) :
@@ -51,7 +52,8 @@ class Player () :
         action = self.choose_action(q)
         reward, done = self.game.reward(action)
         reward = DQ_reward_mul*float(reward)
-        aft_state = self.normalize(np.array([self.game.get_state()]))
+        if not done :
+            aft_state = self.normalize(np.array([self.game.get_state()]))
         print(float(reward))
         if done :
             q[0, action] = reward
