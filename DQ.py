@@ -87,8 +87,8 @@ class Player () :
         filename = '{0}_{1}_{2}_{3}_{4}.h5'.format(now.month, now.day, now.hour, now.minute, now.second)
         self.model.save_weights(os.path.join(DQ_save_directory, filename))
 
-    def load_weight(self) :
-        self.model.load_weights(os.path.join(DQ_save_directory, 'load.h5'))
+    def load_weight(self, name = 'load.h5') :
+        self.model.load_weights(os.path.join(DQ_save_directory, name))
         self.initiated = True
 
     def update (self) :
