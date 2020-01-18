@@ -136,6 +136,7 @@ class Grid() :
                 self.apples.remove(self.grid[trgt[0]][trgt[1]])
                 self.grid[trgt[0]][trgt[1]] = self.snake
                 self.create_apple()
+                self.snake.eat_apple()
             state = GROW
         
         if state == DEAD :
@@ -145,9 +146,9 @@ class Grid() :
             aftdist = abs(aft[0]-app[0]) + abs(aft[1]-app[1])
             tmp = befdist - aftdist
             if tmp < 0 :
-                return -1 * Reward_movement, False
+                return Reward_movement_far, False
             else :
-                return Reward_movement, False
+                return Reward_movement_close, False
         elif state == GROW :
             return Reward_grow, False
 
@@ -182,15 +183,25 @@ class Grid() :
         # y_len = len(self.grid[0])
         ap = np.sign(ap)
         ap = np.dot(ROTATION_ARRAY[direction], ap)
-        ap = np.array([ap[0],ap[1],-1*ap[0]])
         raw = np.array([r,u,l,d])
         conv = np.array([0,0,0])
         conv[RIGHT] = raw[DIRECTION_CONVERT[direction][RIGHT]]
         conv[UP] = raw[DIRECTION_CONVERT[direction][UP]]
         conv[LEFT] = raw[DIRECTION_CONVERT[direction][LEFT]]
-        answer = np.array([conv,conv*ap])
+        if np.all(conv != np.zeros(len(conv))) :
+            conv = conv/np.linalg.norm(conv)
+        answer = np.append(conv,ap)
         return answer.flatten()
+    
+    def current_snake_length(self) :
+        return len(self.snake)
                 
+    def get_snake_length(self) :
+        return self.snakelength
+
+    def set_snake_length(self, l : int) :
+        self.snakelength = l
+
     def reset(self) :
         for i in range (self.width) :
             for j in range(self.height) :
@@ -223,11 +234,12 @@ class Snake() :
         self.body = bodypos.copy()
         self.health = Init_health
         self.direction = direction
+        self.temp = None
 
     def __len__ (self) :
         return len(self.body)
 
-    def move(self, move_direction, apple : bool = False) :
+    def move(self, move_direction) :
         """
         return head direction, health
         """
@@ -237,11 +249,8 @@ class Snake() :
         trgt[1] += DIRECTION_LIST[self.direction][1]
         self.body.insert(0,trgt)
         self.health -= Consume_health
-
-        if not apple :
-            self.body.pop()
-        else :
-            self.eat_apple()
+        self.temp = self.body.pop()
+        
         return self.direction, self.health
 
     def get_list (self) :
@@ -257,6 +266,7 @@ class Snake() :
         return self.health
 
     def eat_apple (self) :
+        self.body.append(self.temp)
         self.health += Apple_health
 
     def get_direction(self):

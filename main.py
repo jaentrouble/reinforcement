@@ -9,7 +9,7 @@ import DQ as dq
 import tracemalloc
 
 class Main() :
-    def __init__ (self, width = 720, height = 720, fps = 60, trap = 15) :
+    def __init__ (self, width = 720, height = 720, fps = 60, trap = 15, load = False) :
         pygame.init()
         self.fps = fps
         self.width = width
@@ -22,13 +22,15 @@ class Main() :
         self.allgroup = pygame.sprite.LayeredDirty()
         self.g_x = self.width // B_size
         self.g_y = self.height // B_size
-        self.grid = grid.Grid(self.g_x, self.g_y, 4, True, trap)
+        self.grid = grid.Grid(self.g_x, self.g_y, 3, True, trap)
         self.groupsetter()
         self.boxes = {grid.Snake : [],
                       grid.Apple : [],
                       grid.Trap : []}
         self.point = 1
         self.player = dq.Player(self.grid)
+        if load :
+            self.player.load_weight()
         self.loop = 0
         # self.qtable = ql.Qtable(self.g_x, self.g_y)
 
@@ -68,13 +70,14 @@ class Main() :
                         mainloop = False 
                         return
             ######################################
-                    if event.key == pygame.K_t :
-                        snapshot = tracemalloc.take_snapshot()
-                        top_stats = snapshot.statistics('traceback')
-                        stat = top_stats[0]
-                        print("%s memory blocks: %.1f KiB" % (stat.count, stat.size / 1024))
-                        for line in stat.traceback.format() :
-                            print(line)
+                    # if event.key == pygame.K_t :
+                    #     snapshot = tracemalloc.take_snapshot()
+                    #     top_stats = snapshot.statistics('traceback')
+                    #     stat = top_stats[0]
+                    #     print("%s memory blocks: %.1f KiB" % (stat.count, stat.size / 1024))
+                    #     for line in stat.traceback.format() :
+                    #         print(line)
+                    
                     # if event.key == pygame.K_LEFT :
                     #     result = self.grid.update(LEFT)
                     #     self.b_update()
@@ -87,6 +90,8 @@ class Main() :
                     # elif event.key == pygame.K_DOWN :
                     #     result = self.grid.update(DOWN)
                     #     self.b_update()
+                    if event.key == pygame.K_s :
+                        self.player.save_weight()
             # if result == MOVED or result == GROW :
             #     self.point += 1
             # if Reward_apple_distance:
@@ -101,8 +106,8 @@ class Main() :
             self.b_update()
             self.allgroup.clear(self.screen, self.background)
             self.allgroup.draw(self.screen)
-            cap = '[FPS] : {0:.1f}, Mvd : {1}, Hp : {2}, Lp : {3}'.format(\
-                self.clock.get_fps(), self.point, self.grid.snake_health(), self.loop)
+            cap = '[FPS] : {0:.1f} length : {1} Lp : {2}'.format(\
+                self.clock.get_fps(), self.grid.current_snake_length(), self.player.get_count())
             pygame.display.set_caption(cap)
             pygame.display.flip()
             
@@ -125,4 +130,4 @@ class Main() :
                 self.boxes[obj][n].update(dic[obj][n])
 
 if __name__ == '__main__' :
-    Main(width = 400, height = 400, fps=60, trap = 0).run()
+    Main(width = 400, height = 400, fps=60, trap = 0, load = True).run()
