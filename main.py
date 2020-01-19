@@ -45,7 +45,6 @@ class Main() :
         
 
     def run(self) :
-        tracemalloc.start(25)
         mainloop = True
         self.screen.blit(self.background, (0,0))
         self.b_update()
@@ -69,15 +68,7 @@ class Main() :
                     if event.key == pygame.K_ESCAPE :
                         mainloop = False 
                         return
-            ######################################
-                    # if event.key == pygame.K_t :
-                    #     snapshot = tracemalloc.take_snapshot()
-                    #     top_stats = snapshot.statistics('traceback')
-                    #     stat = top_stats[0]
-                    #     print("%s memory blocks: %.1f KiB" % (stat.count, stat.size / 1024))
-                    #     for line in stat.traceback.format() :
-                    #         print(line)
-                    
+            ######################################                    
                     # if event.key == pygame.K_LEFT :
                     #     result = self.grid.update(LEFT)
                     #     self.b_update()
@@ -130,4 +121,4 @@ class Main() :
                 self.boxes[obj][n].update(dic[obj][n])
 
 if __name__ == '__main__' :
-    Main(width = 400, height = 400, fps=60, trap = 0, load = True).run()
+    Main(width = 400, height = 400, fps=60, trap = 0, load = False).run()

@@ -31,7 +31,7 @@ Q_e = 0.3
 Q_gamma = 0.7
 Q_alpha = 0.1
 
-DQ_discount = 0.1
+DQ_discount = 0.9
 DQ_e = 0.1
 DQ_buffer_size = 1000
 DQ_mini_buffer = 200
