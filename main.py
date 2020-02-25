@@ -93,12 +93,13 @@ class Main() :
             # if result == DEAD :
             #     reward = Reward_dead
             #     rst = True
+            if not (self.player.rounds +1) % 1000 :
+                self.player.save_weight()
             done = self.player.update()
             self.b_update()
             self.allgroup.clear(self.screen, self.background)
             self.allgroup.draw(self.screen)
-            cap = '[FPS] : {0:.1f} length : {1} Lp : {2}'.format(\
-                self.clock.get_fps(), self.grid.current_snake_length(), self.player.get_count())
+            cap = '[FPS] : {0:.1f} Rounds : {1} Score :{2}'.format(self.clock.get_fps(), self.player.rounds, self.player.score)
             pygame.display.set_caption(cap)
             pygame.display.flip()
             
@@ -121,4 +122,4 @@ class Main() :
                 self.boxes[obj][n].update(dic[obj][n])
 
 if __name__ == '__main__' :
-    Main(width = 400, height = 400, fps=60, trap = 0, load = False).run()
+    Main(width = 200, height = 200, fps=60, trap = 0, load = False).run()

@@ -15,10 +15,10 @@ class Player () :
         self.x = tf.keras.layers.Dense(20)(self.inputs)
         self.x = tf.keras.activations.relu(self.x, max_value = 6)
         self.x = tf.keras.layers.Dense(8)(self.x)
-        # self.x = tf.keras.activations.relu(self.x, max_value = 6)
-        # self.x = tf.keras.layers.Dense(8)(self.x)
         self.x = tf.keras.activations.relu(self.x, max_value = 6)
-        self.outputs = tf.keras.layers.Dense(self.output_size, kernel_initializer = 'zeros')(self.x)
+        self.x = tf.keras.layers.Dense(8)(self.x)
+        self.x = tf.keras.activations.relu(self.x, max_value = 6)
+        self.outputs = tf.keras.layers.Dense(self.output_size)(self.x)
         self.model = tf.keras.Model(inputs = self.inputs, outputs = self.outputs)
         self.model.compile(optimizer = tf.keras.optimizers.Adam(),
                            loss = tf.keras.losses.MeanSquaredError(),
@@ -29,22 +29,32 @@ class Player () :
                            loss = tf.keras.losses.MeanSquaredError(),
                            metrics = [tf.keras.metrics.MeanSquaredError()])
         self.t_model.set_weights(self.model.get_weights())
+        if not os.path.exists(DQ_log):
+            os.makedirs(DQ_log)
+        self.file_writer = tf.summary.create_file_writer(DQ_log)
+        self.file_writer.set_as_default()
         self.input_buffer = np.empty((0,self.input_size))
         self.target_buffer = np.empty((0,self.output_size))
         self.model.summary()
         self.count = 1
-        self.acted = 0
+        self.rounds = 1
         self.initiated = False
         self.buffer_filled = False
 
     def get_count(self) :
         return self.count
 
+    def e_decay(self) :
+        if self.count > DQ_e_nstep :
+            return DQ_e_min
+        else :
+            return DQ_e - (DQ_e-DQ_e_min)*(self.count/DQ_e_nstep)
+
     def choose_action (self, q : np.array) :
         """
         q: shape (1,1); [[*args]]
         """
-        if random.random() < min(DQ_e, DQ_e/(0.1*self.count)) :
+        if random.random() < self.e_decay() :
             print('random')
             return random.randrange(0,len(q[0]))
         else :
@@ -95,18 +105,32 @@ class Player () :
         if not self.initiated :
             r_states, r_qs = self.rand_generator(DQ_generate_random, DQ_generate_level)
             self.model.fit(x = r_states, y = r_qs, epochs = DQ_random_epoch)
+            self.tick = 0
+            self.score = 0
+            self.cumreward =0
             self.initiated = True
-        self.acted += 1
         bef_state = self.normalize(np.array([self.game.get_state()]))
         # print(bef_state)
         q = self.model.predict(bef_state)
-        print(q)
+        # print(q)
         action = self.choose_action(q)
         reward, done = self.game.reward(action)
+        self.cumreward += reward
+        self.tick += 1
+        if float(reward) == Reward_grow :
+            self.score += 1
+        if done :
+            tf.summary.scalar('score', self.score, self.rounds)
+            tf.summary.scalar('score_per_tick', self.score/self.tick, self.rounds)
+            tf.summary.scalar('reward', self.cumreward, self.rounds)
+            self.score = 0
+            self.tick = 0
+            self.cumreward = 0
+            self.rounds += 1
         reward = DQ_reward_mul*float(reward)
         if not done :
             aft_state = self.normalize(np.array([self.game.get_state()]))
-        print(float(reward))
+        # print(float(reward))
         if done :
             q[0, action] = reward
         else:
@@ -114,11 +138,13 @@ class Player () :
             # a = q[0, action]
         self.input_buffer = np.vstack((self.input_buffer, bef_state))
         self.target_buffer = np.vstack((self.target_buffer, q))
-        if len(self.input_buffer) > DQ_buffer_size :
-            self.buffer_filled = True
+        if not self.buffer_filled :
+            print('filling buffer {0}/{1}'.format(len(self.input_buffer), DQ_buffer_size))
+            if len(self.input_buffer) > DQ_buffer_size:
+                self.buffer_filled = True
+        else :
             self.input_buffer = np.delete(self.input_buffer,0,0)
             self.target_buffer = np.delete(self.target_buffer,0,0)
-        if not self.acted % 100 and self.buffer_filled:
             self.count += 1
             mini_idx = random.sample(range(len(self.input_buffer)),min(DQ_mini_buffer,len(self.input_buffer)))
             mini_input = np.empty((0,self.input_size))
@@ -126,8 +152,13 @@ class Player () :
             for idx in mini_idx :
                 mini_input = np.vstack((mini_input,self.input_buffer[idx]))
                 mini_target = np.vstack((mini_target,self.target_buffer[idx]))
-            self.model.fit(x = mini_input, y = mini_target, epochs = DQ_epoch)
-            if not self.count % 10 :
+            self.model.fit(
+                x = mini_input, 
+                y = mini_target, 
+                epochs = DQ_epoch,
+                verbose = 0,
+            )
+            if not self.count % DQ_target_update :
                 self.t_model.set_weights(self.model.get_weights())
         return done
 

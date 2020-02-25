@@ -1,4 +1,6 @@
 import numpy as np
+import os
+import datetime
 RIGHT = 0
 UP = 1
 LEFT = 2
@@ -31,19 +33,27 @@ Q_e = 0.3
 Q_gamma = 0.7
 Q_alpha = 0.1
 
-DQ_discount = 0.9
+DQ_discount = 0.99
 DQ_e = 0.1
-DQ_buffer_size = 1000
-DQ_mini_buffer = 200
+DQ_e_min = 0.01
+DQ_e_nstep = 10000
+DQ_buffer_size = 10000
+DQ_mini_buffer = 20
 DQ_reward_mul = 1
-DQ_epoch = 3
-DQ_random_epoch = 3
-DQ_generate_random = 2000
+DQ_epoch = 1
+DQ_random_epoch = 1
+DQ_generate_random = 500
 DQ_generate_level = 5
+DQ_target_update = 100
 DQ_save_directory = 'savefiles'
+now = datetime.datetime.now()
+DQ_log = os.path.join(
+    'records',
+    '{0}_{1}_{2}_{3}_{4}'.format(now.month, now.day, now.hour, now.minute, now.second),
+)
 
-Reward_grow = 0.7
-Reward_dead = -1
+Reward_grow = 1
+Reward_dead = -0.7
 # Reward_apple_distance = True
-Reward_movement_close = 0.1
-Reward_movement_far = -0.2
+Reward_movement_close = -0.1
+Reward_movement_far = -0.1
