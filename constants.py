@@ -38,7 +38,7 @@ Q_e = 0.3
 Q_gamma = 0.7
 Q_alpha = 0.1
 
-DQ_discount = 0.99
+DQ_discount = 0.999
 DQ_e = 0.1
 DQ_e_min = 0.01
 DQ_e_nstep = 100000
