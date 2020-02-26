@@ -36,11 +36,11 @@ class Grid() :
         self.create_apple(self.a_init)
         for _ in range(self.trap_num) :
             self.create_trap()
-        self.control_choice = 3
-        self.info = len(self.get_state())
+        self.control_size = 3
+        self.info = np.array(self.get_state()).shape
 
     def action_size(self) :
-        return self.control_choice
+        return self.control_size
 
     def state_size(self) :
         return self.info

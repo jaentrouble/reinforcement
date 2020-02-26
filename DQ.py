@@ -11,7 +11,7 @@ class Player () :
         self.game = game
         self.input_size = game.state_size()
         self.output_size = game.action_size()
-        self.inputs = tf.keras.Input(shape = (self.input_size,))
+        self.inputs = tf.keras.Input(shape = self.input_size)
         self.x = tf.keras.layers.Dense(20)(self.inputs)
         self.x = tf.keras.activations.relu(self.x, max_value = 6)
         self.x = tf.keras.layers.Dense(8)(self.x)
@@ -24,7 +24,7 @@ class Player () :
                            loss = tf.keras.losses.MeanSquaredError(),
                            metrics = [tf.keras.metrics.MeanSquaredError()])
         self.t_model = tf.keras.models.clone_model(self.model)
-        self.t_model.build((None, self.input_size))
+        self.t_model.build(self.input_size)
         self.t_model.compile(optimizer = tf.keras.optimizers.Adam(),
                            loss = tf.keras.losses.MeanSquaredError(),
                            metrics = [tf.keras.metrics.MeanSquaredError()])
@@ -33,7 +33,7 @@ class Player () :
             os.makedirs(DQ_log)
         self.file_writer = tf.summary.create_file_writer(DQ_log)
         self.file_writer.set_as_default()
-        self.input_buffer = np.empty((0,self.input_size))
+        self.input_buffer = np.empty(self.input_size)
         self.target_buffer = np.empty((0,self.output_size))
         self.model.summary()
         self.count = 1
@@ -147,7 +147,7 @@ class Player () :
             self.target_buffer = np.delete(self.target_buffer,0,0)
             self.count += 1
             mini_idx = random.sample(range(len(self.input_buffer)),min(DQ_mini_buffer,len(self.input_buffer)))
-            mini_input = np.empty((0,self.input_size))
+            mini_input = np.empty(self.input_size)
             mini_target = np.empty((0,self.output_size))
             for idx in mini_idx :
                 mini_input = np.vstack((mini_input,self.input_buffer[idx]))

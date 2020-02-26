@@ -6,6 +6,11 @@ UP = 1
 LEFT = 2
 DOWN = 3
 
+G_TRAP = 0
+G_EMPTY = 1
+G_SNAKE = 2
+G_APPLE = 3
+
 DIRECTION_LIST = [[1,0],[0,-1],[-1,0],[0,1]]
 
 MOVE_RIGHT = 0
@@ -36,7 +41,7 @@ Q_alpha = 0.1
 DQ_discount = 0.99
 DQ_e = 0.1
 DQ_e_min = 0.01
-DQ_e_nstep = 10000
+DQ_e_nstep = 100000
 DQ_buffer_size = 10000
 DQ_mini_buffer = 20
 DQ_reward_mul = 1
@@ -52,8 +57,8 @@ DQ_log = os.path.join(
     '{0}_{1}_{2}_{3}_{4}'.format(now.month, now.day, now.hour, now.minute, now.second),
 )
 
-Reward_grow = 1
-Reward_dead = -0.7
+Reward_grow = 0.7
+Reward_dead = -1
 # Reward_apple_distance = True
-Reward_movement_close = -0.1
-Reward_movement_far = -0.1
+Reward_movement_close = 0.1
+Reward_movement_far = -0.2

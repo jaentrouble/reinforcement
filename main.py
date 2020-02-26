@@ -1,11 +1,11 @@
 import pygame
-import grid
+import grid_2d as grid
 from constants import *
 import boxes
 import Qlearn as ql
 import math
 import time
-import DQ as dq
+import DQ_2d as dq
 import tracemalloc
 
 class Main() :
@@ -24,9 +24,9 @@ class Main() :
         self.g_y = self.height // B_size
         self.grid = grid.Grid(self.g_x, self.g_y, 3, True, trap)
         self.groupsetter()
-        self.boxes = {grid.Snake : [],
-                      grid.Apple : [],
-                      grid.Trap : []}
+        self.boxes = {G_SNAKE : [],
+                      G_APPLE : [],
+                      G_TRAP : []}
         self.point = 1
         self.player = dq.Player(self.grid)
         if load :

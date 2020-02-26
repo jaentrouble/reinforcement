@@ -4,9 +4,9 @@ from constants import *
 
 class Box (pygame.sprite.DirtySprite) :
     base_box = pygame.Surface((B_size, B_size))
-    color_dic = {grid.Snake : (255,255,255),
-                 grid.Apple : (255,0,0),
-                 grid.Trap : (0,255,0)}
+    color_dic = {G_SNAKE : (255,255,255),
+                 G_APPLE : (255,0,0),
+                 G_TRAP : (0,255,0)}
     img = {}
     for obj in color_dic :
         img[obj] = base_box.copy()
