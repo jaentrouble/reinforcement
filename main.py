@@ -22,7 +22,7 @@ class Main() :
         self.allgroup = pygame.sprite.LayeredDirty()
         self.g_x = self.width // B_size
         self.g_y = self.height // B_size
-        self.grid = grid.Grid(self.g_x, self.g_y, 3, True, trap)
+        self.grid = grid.Grid(self.g_x, self.g_y, 3, False, trap)
         self.groupsetter()
         self.boxes = {G_SNAKE : [],
                       G_APPLE : [],
@@ -93,10 +93,10 @@ class Main() :
             # if result == DEAD :
             #     reward = Reward_dead
             #     rst = True
-            if not (self.player.rounds +1) % 1000 :
-                self.player.save_weight()
             done = self.player.update()
             self.b_update()
+            if not (self.player.total_tick +1) % DQ_save_rate :
+                self.player.save_weight()
             self.allgroup.clear(self.screen, self.background)
             self.allgroup.draw(self.screen)
             cap = '[FPS] : {0:.1f} Rounds : {1} Score :{2}'.format(self.clock.get_fps(), self.player.rounds, self.player.score)

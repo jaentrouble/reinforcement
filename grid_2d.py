@@ -20,9 +20,9 @@ class Grid() :
         if self.rand :   
             self.snake = Snake(*tool.randposlist(self.snakelength, self.width, self.height))
         else :
-            # self.s_init = tool.randposlist(self.snakelength, self.width, self.height)
-            self.s_init = [[self.width-3,self.height-3]]
-            self.snake = Snake(self.s_init,0)
+            self.s_init = tool.randposlist(self.snakelength, self.width, self.height)
+            # self.s_init = [[self.width-3,self.height-3]]
+            self.snake = Snake(*self.s_init)
         for pos in self.snake.get_list() :
             self.grid[pos[0]][pos[1]] = G_SNAKE
         self.apples = []
@@ -59,8 +59,8 @@ class Grid() :
             tmpos = tool.randpos(0, self.width-1, 0, self.height-1)
             while self.grid[tmpos[0]][tmpos[1]] != G_EMPTY :
                 tmpos = tool.randpos(0, self.width-1, 0, self.height-1)
-            if not self.rand :
-                self.a_init = tmpos
+            # if not self.rand :
+            #     self.a_init = tmpos
         else :
             tmpos = pos
         self.apples.append(tmpos)
@@ -124,11 +124,11 @@ class Grid() :
         elif self.grid[trgt[0]][trgt[1]] in (G_SNAKE, G_TRAP) :
             state = DEAD
         elif self.grid[trgt[0]][trgt[1]] == G_APPLE :
-            if self.rand :
-                self.apples.remove(trgt)
-                self.grid[trgt[0]][trgt[1]] = G_SNAKE
-                self.create_apple()
-                self.snake.eat_apple()
+            # if self.rand :
+            self.apples.remove(trgt)
+            self.grid[trgt[0]][trgt[1]] = G_SNAKE
+            self.create_apple()
+            self.snake.eat_apple()
             state = GROW
         
         if state == DEAD :
@@ -161,7 +161,7 @@ class Grid() :
         if self.rand :
             self.snake = Snake(*tool.randposlist(self.snakelength, self.width, self.height))
         else :
-            self.snake = Snake(self.s_init, 0)
+            self.snake = Snake(*self.s_init)
         for pos in self.snake.get_list() :
             self.grid[pos[0]][pos[1]] = G_SNAKE
         self.apples = []

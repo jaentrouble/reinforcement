@@ -38,7 +38,7 @@ Q_e = 0.3
 Q_gamma = 0.7
 Q_alpha = 0.1
 
-DQ_discount = 0.999
+DQ_discount = 0.99
 DQ_e = 0.1
 DQ_e_min = 0.01
 DQ_e_nstep = 100000
@@ -49,8 +49,9 @@ DQ_epoch = 1
 DQ_random_epoch = 1
 DQ_generate_random = 500
 DQ_generate_level = 5
-DQ_target_update = 100
+DQ_target_update = 2000
 DQ_save_directory = 'savefiles'
+DQ_save_rate = 100000
 now = datetime.datetime.now()
 DQ_log = os.path.join(
     'records',

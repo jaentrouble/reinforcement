@@ -14,10 +14,10 @@ class Player () :
         self.inputs = tf.keras.Input(shape = self.input_size)
         self.x = tf.keras.layers.Conv2D(32,3,padding='same')(self.inputs)
         self.x = tf.keras.activations.relu(self.x, max_value = 6)
-        self.x = tf.keras.layers.Conv2D(32,2,strides=2)(self.x)
+        self.x = tf.keras.layers.Conv2D(16,2,strides=2)(self.x)
         self.x = tf.keras.activations.relu(self.x, max_value = 6)
         self.x = tf.keras.layers.Flatten()(self.x)
-        self.x = tf.keras.layers.Dense(512)(self.x)
+        self.x = tf.keras.layers.Dense(128)(self.x)
         self.x = tf.keras.activations.relu(self.x, max_value = 6)
         self.outputs = tf.keras.layers.Dense(self.output_size)(self.x)
         self.model = tf.keras.Model(inputs = self.inputs, outputs = self.outputs)
@@ -25,10 +25,10 @@ class Player () :
                            loss = tf.keras.losses.MeanSquaredError(),
                            metrics = [tf.keras.metrics.MeanSquaredError()])
         self.t_model = tf.keras.models.clone_model(self.model)
-        self.t_model.build(self.input_size)
-        self.t_model.compile(optimizer = tf.keras.optimizers.Adam(),
-                           loss = tf.keras.losses.MeanSquaredError(),
-                           metrics = [tf.keras.metrics.MeanSquaredError()])
+        # self.t_model.build(self.input_size)
+        # self.t_model.compile(optimizer = tf.keras.optimizers.Adam(),
+        #                    loss = tf.keras.losses.MeanSquaredError(),
+        #                    metrics = [tf.keras.metrics.MeanSquaredError()])
         self.t_model.set_weights(self.model.get_weights())
         if not os.path.exists(DQ_log):
             os.makedirs(DQ_log)
@@ -100,12 +100,11 @@ class Player () :
 
     def load_weight(self, name = 'load.h5') :
         self.model.load_weights(os.path.join(DQ_save_directory, name))
-        self.initiated = True
 
     def update (self) :
         if not self.initiated :
-            r_states, r_qs = self.rand_generator(DQ_generate_random, DQ_generate_level)
-            self.model.fit(x = r_states, y = r_qs, epochs = DQ_random_epoch)
+            # r_states, r_qs = self.rand_generator(DQ_generate_random, DQ_generate_level)
+            # self.model.fit(x = r_states, y = r_qs, epochs = DQ_random_epoch)
             self.tick = 0
             self.total_tick = 0
             self.score = 0
@@ -126,6 +125,7 @@ class Player () :
             tf.summary.scalar('score', self.score, self.rounds)
             tf.summary.scalar('score_per_tick', self.score/self.tick, self.rounds)
             tf.summary.scalar('reward', self.cumreward, self.rounds)
+            tf.summary.scalar('reward_per_tick', self.cumreward/self.tick, self.rounds)
             self.score = 0
             self.tick = 0
             self.cumreward = 0
@@ -142,12 +142,13 @@ class Player () :
         self.input_buffer[self.total_tick%DQ_buffer_size] = bef_state[0]
         self.target_buffer[self.total_tick%DQ_buffer_size] = q[0]
         if not self.buffer_filled :
-            print('filling buffer {0}/{1}'.format(self.total_tick, DQ_buffer_size))
+            if not self.total_tick % 100 :
+                print('filling buffer {0}/{1}'.format(self.total_tick, DQ_buffer_size))
             if self.total_tick > DQ_buffer_size:
                 self.buffer_filled = True
         else :
             self.count += 1
-            mini_idx = random.sample(range(len(self.input_buffer)),min(DQ_mini_buffer,len(self.input_buffer)))
+            mini_idx = random.sample(range(len(self.input_buffer)),DQ_mini_buffer)
             mini_input = np.zeros((DQ_mini_buffer,*self.input_size),dtype=int)
             mini_target = np.zeros((DQ_mini_buffer,self.output_size))
             for n,idx in enumerate(mini_idx) :
