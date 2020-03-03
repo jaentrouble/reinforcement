@@ -101,7 +101,7 @@ class Grid() :
         bef = trgt.copy()
         app = self.apple()
         state = None
-        direction, health = self.snake.move(move_direction)
+        direction, _ = self.snake.move(move_direction)
 
         trgt[0] += DIRECTION_LIST[direction][0]
         trgt[1] += DIRECTION_LIST[direction][1]
@@ -109,10 +109,8 @@ class Grid() :
         if (trgt[0] > self.width-1 or
             trgt[0] < 0 or
             trgt[1] > self.height-1 or
-            trgt[1] < 0 or
-            health < 0)  :
-            state = DEAD
-        if state == DEAD :
+            trgt[1] < 0)  :
+            
             return Reward_dead, True
         else :
             aft = trgt.copy()
@@ -131,6 +129,11 @@ class Grid() :
             self.snake.eat_apple()
             state = GROW
         
+        if self.snake.get_health() < 0 :
+            starve = True
+        else :
+            starve = False
+
         if state == DEAD :
             return Reward_dead, True
         elif state == MOVED :
@@ -138,9 +141,9 @@ class Grid() :
             aftdist = abs(aft[0]-app[0]) + abs(aft[1]-app[1])
             tmp = befdist - aftdist
             if tmp < 0 :
-                return Reward_movement_far, False
+                return Reward_movement_far, starve
             else :
-                return Reward_movement_close, False
+                return Reward_movement_close, starve
         elif state == GROW :
             return Reward_grow, False
 

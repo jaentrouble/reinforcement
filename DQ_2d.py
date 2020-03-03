@@ -12,12 +12,12 @@ class Player () :
         self.input_size = game.state_size()
         self.output_size = game.action_size()
         self.inputs = tf.keras.Input(shape = self.input_size)
-        self.x = tf.keras.layers.Conv2D(32,3,padding='same')(self.inputs)
+        self.x = tf.keras.layers.Conv2D(64,4,strides = 2)(self.inputs)
         self.x = tf.keras.activations.relu(self.x, max_value = 6)
-        self.x = tf.keras.layers.Conv2D(16,2,strides=2)(self.x)
+        self.x = tf.keras.layers.Conv2D(32,2)(self.x)
         self.x = tf.keras.activations.relu(self.x, max_value = 6)
         self.x = tf.keras.layers.Flatten()(self.x)
-        self.x = tf.keras.layers.Dense(128)(self.x)
+        self.x = tf.keras.layers.Dense(512)(self.x)
         self.x = tf.keras.activations.relu(self.x, max_value = 6)
         self.outputs = tf.keras.layers.Dense(self.output_size)(self.x)
         self.model = tf.keras.Model(inputs = self.inputs, outputs = self.outputs)
@@ -40,6 +40,7 @@ class Player () :
         self.count = 1
         self.rounds = 1
         self.initiated = False
+        self.start_learning = False
         self.buffer_filled = False
 
     def get_count(self) :
@@ -56,7 +57,6 @@ class Player () :
         q: shape (1,1); [[*args]]
         """
         if random.random() < self.e_decay() :
-            print('random')
             return random.randrange(0,len(q[0]))
         else :
             m = max(q[0])
@@ -113,6 +113,7 @@ class Player () :
         bef_state = self.normalize(np.array([self.game.get_state()]))
         # print(bef_state)
         q = self.model.predict(bef_state)
+        tf.summary.scalar('maxQ', q.max(), self.total_tick)
         # print(q)
         action = self.choose_action(q)
         reward, done = self.game.reward(action)
@@ -122,10 +123,17 @@ class Player () :
         if float(reward) == Reward_grow :
             self.score += 1
         if done :
-            tf.summary.scalar('score', self.score, self.rounds)
-            tf.summary.scalar('score_per_tick', self.score/self.tick, self.rounds)
-            tf.summary.scalar('reward', self.cumreward, self.rounds)
-            tf.summary.scalar('reward_per_tick', self.cumreward/self.tick, self.rounds)
+            tf.summary.scalar('score', self.score, self.total_tick)
+            tf.summary.scalar('score_per_tick', self.score/self.tick, self.total_tick)
+            tf.summary.scalar('reward', self.cumreward, self.total_tick)
+            tf.summary.scalar('reward_per_tick', self.cumreward/self.tick, self.total_tick)
+            tf.summary.scalar('tick_per_round', self.tick, self.total_tick)
+            print('{0} round ({3} ticks) || Score : {1} | Reward : {2:.2f}'.format(
+                self.rounds,
+                self.score,
+                self.cumreward,
+                self.tick,
+            ))
             self.score = 0
             self.tick = 0
             self.cumreward = 0
@@ -141,14 +149,19 @@ class Player () :
             # a = q[0, action]
         self.input_buffer[self.total_tick%DQ_buffer_size] = bef_state[0]
         self.target_buffer[self.total_tick%DQ_buffer_size] = q[0]
-        if not self.buffer_filled :
+        if not self.start_learning :
             if not self.total_tick % 100 :
-                print('filling buffer {0}/{1}'.format(self.total_tick, DQ_buffer_size))
-            if self.total_tick > DQ_buffer_size:
-                self.buffer_filled = True
+                print('filling buffer {0}/{1}'.format(self.total_tick, DQ_learn_start))
+            if self.total_tick > DQ_learn_start:
+                self.start_learning = True
         else :
             self.count += 1
-            mini_idx = random.sample(range(len(self.input_buffer)),DQ_mini_buffer)
+            if not self.buffer_filled :
+                mini_idx = random.sample(range(1, self.total_tick),DQ_mini_buffer)
+                if self.total_tick >= DQ_buffer_size :
+                    self.buffer_filled = True
+            else :
+                mini_idx = random.sample(range(DQ_buffer_size),DQ_mini_buffer)
             mini_input = np.zeros((DQ_mini_buffer,*self.input_size),dtype=int)
             mini_target = np.zeros((DQ_mini_buffer,self.output_size))
             for n,idx in enumerate(mini_idx) :

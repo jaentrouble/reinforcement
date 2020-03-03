@@ -3,6 +3,7 @@ import grid_2d as grid
 from constants import *
 import boxes
 import Qlearn as ql
+import eval_play as ep
 import math
 import time
 import DQ_2d as dq
@@ -22,13 +23,13 @@ class Main() :
         self.allgroup = pygame.sprite.LayeredDirty()
         self.g_x = self.width // B_size
         self.g_y = self.height // B_size
-        self.grid = grid.Grid(self.g_x, self.g_y, 3, False, trap)
+        self.grid = grid.Grid(self.g_x, self.g_y, 3, True, trap)
         self.groupsetter()
         self.boxes = {G_SNAKE : [],
                       G_APPLE : [],
                       G_TRAP : []}
         self.point = 1
-        self.player = dq.Player(self.grid)
+        self.player = ep.Player(self.grid)
         if load :
             self.player.load_weight()
         self.loop = 0
