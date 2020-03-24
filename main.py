@@ -1,12 +1,12 @@
 import pygame
-import grid_2d as grid
+import grid_1d as grid
 from constants import *
 import boxes
 import Qlearn as ql
 import eval_play as ep
 import math
 import time
-import DQ_2d as dq
+import DQ_1d as dq
 import tracemalloc
 
 class Main() :
@@ -29,7 +29,7 @@ class Main() :
                       G_APPLE : [],
                       G_TRAP : []}
         self.point = 1
-        self.player = ep.Player(self.grid)
+        self.player = dq.Player(self.grid)
         if load :
             self.player.load_weight()
         self.loop = 0
@@ -123,4 +123,4 @@ class Main() :
                 self.boxes[obj][n].update(dic[obj][n])
 
 if __name__ == '__main__' :
-    Main(width = 200, height = 200, fps=60, trap = 0, load = False).run()
+    Main(width = 200, height = 200, fps=120, trap = 0, load = False).run()

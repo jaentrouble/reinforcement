@@ -5,6 +5,10 @@ RIGHT = 0
 UP = 1
 LEFT = 2
 DOWN = 3
+RU = 0
+LU = 1
+LD = 2
+RD = 3
 
 G_TRAP = 0
 G_EMPTY = 1
