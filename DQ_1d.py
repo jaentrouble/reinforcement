@@ -1,23 +1,22 @@
 import tensorflow as tf
 import numpy as np
-import grid_2d as grid
 import random
 from constants import *
 import datetime
 import os
 
 class Player () :
-    def __init__(self, game : grid.Grid) :
+    def __init__(self, game) :
         self.game = game
         self.input_size = game.state_size()
         self.output_size = game.action_size()
         self.inputs = tf.keras.Input(shape = self.input_size)
-        self.x = tf.keras.layers.Conv1D(32,3)(self.inputs)
+        self.x = tf.keras.layers.Conv1D(64,1)(self.inputs)
         self.x = tf.keras.activations.relu(self.x, max_value = 6)
-        self.x = tf.keras.layers.Conv1D(16,3)(self.x)
+        self.x = tf.keras.layers.Conv1D(32,1)(self.x)
         self.x = tf.keras.activations.relu(self.x, max_value = 6)
         self.x = tf.keras.layers.Flatten()(self.x)
-        self.x = tf.keras.layers.Dense(128)(self.x)
+        self.x = tf.keras.layers.Dense(512)(self.x)
         self.x = tf.keras.activations.relu(self.x, max_value = 6)
         self.outputs = tf.keras.layers.Dense(self.output_size)(self.x)
         self.model = tf.keras.Model(inputs = self.inputs, outputs = self.outputs)
@@ -60,7 +59,7 @@ class Player () :
             return random.choice(indices)
 
     def normalize (self, n : np.array) :
-        n = tf.keras.utils.normalize(n)
+        # n = tf.keras.utils.normalize(n)
         return n
 
     def rand_generator(self, n : int, level : int) :

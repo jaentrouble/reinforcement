@@ -3,10 +3,10 @@ import grid_1d as grid
 from constants import *
 import boxes
 import time
-import DQ_1d as dq
+import eval_play_1d as dq
 
 class Main() :
-    def __init__ (self, width = 720, height = 720, fps = 60, trap = 15, load = False) :
+    def __init__ (self, width = 720, height = 720, fps = 60, trap = 15) :
         pygame.init()
         self.fps = fps
         self.width = width
@@ -26,8 +26,6 @@ class Main() :
                       G_TRAP : []}
         self.point = 1
         self.player = dq.Player(self.grid)
-        if load :
-            self.player.load_weight()
         self.loop = 0
 
     def reset(self) :
@@ -68,12 +66,8 @@ class Main() :
                     # elif event.key == pygame.K_DOWN :
                     #     result = self.grid.update(DOWN)
                     #     self.b_update()
-                    if event.key == pygame.K_s :
-                        self.player.save_weight()
             done = self.player.update()
             self.b_update()
-            if not (self.player.total_tick +1) % DQ_save_rate :
-                self.player.save_weight()
             self.allgroup.clear(self.screen, self.background)
             self.allgroup.draw(self.screen)
             cap = '[FPS] : {0:.1f} Rounds : {1} Score :{2}'.format(self.clock.get_fps(), self.player.rounds, self.player.score)
@@ -97,4 +91,4 @@ class Main() :
                 self.boxes[obj][n].update(dic[obj][n])
 
 if __name__ == '__main__' :
-    Main(width = 200, height = 200, fps=120, trap = 0, load = False).run()
+    Main(width = 200, height = 200, fps=60, trap = 0).run()
